@@ -1,49 +1,53 @@
-import axios from "axios";
-import { rootStore } from "easemob-chat-uikit";
+import axios from 'axios'
+import { rootStore } from 'easemob-chat-uikit'
+
+const isSandBox = true
+const domain =
+  (window.location.protocol === 'https:' ? 'https:' : 'http:') +
+  (isSandBox ? '//a1-hsb.easemob.com' : '//a1-appserver.easemob.com')
+
 export const uploadImage = (formData: FormData) => {
-  axios.defaults.headers.common["Authorization"] =
-    "Bearer " + rootStore.client.context.accessToken;
+  axios.defaults.headers.common['Authorization'] =
+    'Bearer ' + rootStore.client.context.accessToken
   return axios
     .post(
-      `https://a1-appserver.easemob.com/inside/app/user/${rootStore.client.user}/avatar/upload`,
+      `${domain}/inside/app/user/${rootStore.client.user}/avatar/upload`,
       formData,
       {
         headers: {
-          "Content-Type": "multipart/form-data",
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       }
     )
     .then((response) => {
       return rootStore.client
-        .updateOwnUserInfo("avatarurl", response.data.avatarUrl)
+        .updateOwnUserInfo('avatarurl', response.data.avatarUrl)
         .then((res: any) => {
-          return response.data.avatarUrl;
-        });
+          return response.data.avatarUrl
+        })
     })
     .catch((error) => {
-      console.error("uploadImage fail", error);
-    });
-};
+      console.error('uploadImage fail', error)
+    })
+}
 
 async function sendRequest(groupId: string) {
-  axios.defaults.headers.common["Authorization"] =
-    "Bearer " + rootStore.client.context.accessToken;
+  axios.defaults.headers.common['Authorization'] =
+    'Bearer ' + rootStore.client.context.accessToken
   return await axios
-    .get(
-      `https://a1-appserver.easemob.com/inside/app/group/${groupId}/avatarurl`
-    )
+    .get(`${domain}/inside/app/group/${groupId}/avatarurl`)
     .then((response) => {
-      return response.data.avatarUrl;
+      return response.data.avatarUrl
     })
     .catch(() => {
-      return "";
-    });
+      return ''
+    })
 }
 
 export const getGroupAvatar = async (groupIds: string[]) => {
-  let result: { [key: string]: string } = {};
+  let result: { [key: string]: string } = {}
   for (let groupId of groupIds) {
-    result[groupId] = await sendRequest(groupId);
+    result[groupId] = await sendRequest(groupId)
   }
-  return result;
-};
+  return result
+}

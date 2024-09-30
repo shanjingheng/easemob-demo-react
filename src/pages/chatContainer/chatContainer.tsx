@@ -4,8 +4,8 @@ import {
   forwardRef,
   useImperativeHandle,
   useEffect,
-  useContext,
-} from "react";
+  useContext
+} from 'react'
 import {
   Chat,
   GroupDetail,
@@ -31,128 +31,159 @@ import {
   PinnedMessage,
   usePinnedMessage,
   RootContext,
-} from "easemob-chat-uikit";
-import toast from "../../components/toast/toast";
-import { APP_ID, appKey } from "../../config";
-import { getRtcToken, getRtcChannelMembers } from "../../service/rtc";
-import { getGroupAvatar } from "../../service/avatar";
-import UserInviteModal from "../../components/userInviteModal/userInviteModal";
-import "./chatContainer.scss";
-import UserInfo from "../../components/userInfo/userInfo";
-import { observer } from "mobx-react-lite";
-import { useAppSelector, useAppDispatch } from "../../hooks";
-import CreateChat from "./createChat";
-import classNames from "classnames";
-import i18next from "../../i18n";
-import { url } from "inspector";
+  Button,
+  Tooltip
+} from 'easemob-chat-uikit'
+import toast from '../../components/toast/toast'
+import { APP_ID, appKey } from '../../config'
+import { getRtcToken, getRtcChannelMembers } from '../../service/rtc'
+import { getGroupAvatar } from '../../service/avatar'
+import summary from '../../assets/summary.svg'
+import UserInviteModal from '../../components/userInviteModal/userInviteModal'
+import './chatContainer.scss'
+import UserInfo from '../../components/userInfo/userInfo'
+import { observer } from 'mobx-react-lite'
+import { useAppSelector, useAppDispatch } from '../../hooks'
+import CreateChat from './createChat'
+import classNames from 'classnames'
+import i18next from '../../i18n'
+import { url } from 'inspector'
+import { set } from 'mobx'
+import CreateGroupChatSummary from './createGroupChatSummary'
+import GroupChatSummary from '../groupChatSummary/groupChatSummary'
+import {
+  openPanel,
+  closePanel,
+  setGenerateParams
+} from '../../store/summaryInfoSlice'
+
+enum RightPanelType {
+  GroupDetail,
+  UserInfo,
+  Thread,
+  PinnedMessage,
+  GroupChatSummary,
+  None
+}
+
 const ChatContainer = forwardRef((props, ref) => {
-  const appConfig = useAppSelector((state) => state.appConfig);
-  const [userSelectVisible, setUserSelectVisible] = useState(false); // 是否显示创建群组弹窗
-  const [addContactVisible, setAddContactVisible] = useState(false); //是否显示添加联系人弹窗
+  const appConfig = useAppSelector((state) => state.appConfig)
+  const summaryInfo = useAppSelector((state) => state.summaryInfo)
+  const dispatch = useAppDispatch()
+  const [userSelectVisible, setUserSelectVisible] = useState(false) // 是否显示创建群组弹窗
+  const [addContactVisible, setAddContactVisible] = useState(false) //是否显示添加联系人弹窗
   const [conversationDetailVisible, setConversationDetailVisible] =
-    useState(false); //是否显示群组设置/联系人详情弹窗
-  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
-  const [cvsItem, setCvsItem] = useState<any>([]);
+    useState(false) //是否显示群组设置/联系人详情弹窗
+  const [selectedUsers, setSelectedUsers] = useState<any[]>([])
+  const [cvsItem, setCvsItem] = useState<any>([])
   const [forwardedMessages, setForwardedMessages] = useState<
     Record<string, any>
-  >({});
-  const [contactListVisible, setContactListVisible] = useState(false); // 是否显示单条消息转发弹窗
-  const [userInviteModalVisible, setUserInviteModalVisible] = useState(false); // 是否显示音视频邀请人员弹窗
-  const [agoraUuId, setAgoraUuId] = useState<string>(""); // 当前用户的音视频时的agoraUid
+  >({})
+  const [contactListVisible, setContactListVisible] = useState(false) // 是否显示单条消息转发弹窗
+  const [userInviteModalVisible, setUserInviteModalVisible] = useState(false) // 是否显示音视频邀请人员弹窗
+  const [agoraUuId, setAgoraUuId] = useState<string>('') // 当前用户的音视频时的agoraUid
   const [joinedRtcRoomUsers, setJoinedRtcRoomUsers] = useState<
     { userId: string }[]
-  >([]); // 已加入音视频房间的用户
-  const [userId, setUserId] = useState(""); // 要添加联系人的userId
-  const [rtcGroupId, setRtcGroupId] = useState(""); // 当前音视频房间的groupId
+  >([]) // 已加入音视频房间的用户
+  const [userId, setUserId] = useState('') // 要添加联系人的userId
+  const [rtcGroupId, setRtcGroupId] = useState('') // 当前音视频房间的groupId
+  const groupChatSummaryVisible = summaryInfo.showPanel // 群聊摘要是否显示
+  const [rightPanel, setRightPanel] = useState<RightPanelType>(
+    RightPanelType.None
+  )
+  const [showSummaryOptions, setShowSummaryOptions] = useState(false)
 
-  const context = useContext(RootContext);
-  const { theme } = context;
-  const themeMode = theme?.mode;
+  const context = useContext(RootContext)
+  const { theme } = context
+  const themeMode = theme?.mode
   const handleUserIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserId(e.target.value);
-  };
+    setUserId(e.target.value)
+  }
 
   const isInGroup = rootStore.addressStore.groups.some((item) => {
     // @ts-ignore
-    return item.groupid == cvsItem.conversationId;
-  });
+    return item.groupid == cvsItem.conversationId
+  })
   const handleEllipsisClick = () => {
-    if (cvsItem.chatType == "groupChat") {
+    if (cvsItem.chatType == 'groupChat') {
       if (thread.showThreadPanel) {
-        rootStore.threadStore.setThreadVisible(false);
+        rootStore.threadStore.setThreadVisible(false)
       }
       if (pinMsgVisible) {
-        hidePinMsg();
+        hidePinMsg()
       }
-      isInGroup && setConversationDetailVisible((value) => !value);
+      if (groupChatSummaryVisible) {
+        dispatch(closePanel())
+      }
+      isInGroup && setConversationDetailVisible((value) => !value)
     } else {
-      setConversationDetailVisible((value) => !value);
+      setConversationDetailVisible((value) => !value)
     }
-  };
+  }
 
   const handleGetIdMap = (data: { userId: string; channel: string }) => {
     return getRtcChannelMembers({
       username: data.userId,
       channelName: data.channel,
-      appKey: appKey,
+      appKey: appKey
     }).then((res) => {
-      return res;
-    });
-  };
+      return res
+    })
+  }
 
   const handleRtcStateChange = (state: any) => {
-    console.log("handleRtcStateChange", state);
-  };
+    console.log('handleRtcStateChange', state)
+  }
 
   const getRtcToken2 = (data: {
-    channel: string | number;
-    chatUserId: string;
+    channel: string | number
+    chatUserId: string
   }) => {
     return getRtcToken({
       channelName: data.channel,
       username: data.chatUserId,
-      appKey: appKey,
+      appKey: appKey
     }).then((res) => {
-      const { agoraUserId, accessToken } = res;
-      setAgoraUuId(String(agoraUserId));
+      const { agoraUserId, accessToken } = res
+      setAgoraUuId(String(agoraUserId))
       return {
         agoraUid: agoraUserId,
-        accessToken,
-      };
-    });
-  };
+        accessToken
+      }
+    })
+  }
 
-  const [mediaType, setMediaType] = useState<"audio" | "video">("audio");
+  const [mediaType, setMediaType] = useState<'audio' | 'video'>('audio')
   const handleInviteUser = (data: any) => {
-    setMediaType(data.type);
-    setRtcGroupId(data.conversation.conversationId);
+    setMediaType(data.type)
+    setRtcGroupId(data.conversation.conversationId)
 
-    setUserInviteModalVisible(true);
+    setUserInviteModalVisible(true)
     // getGroupMembers(data.conversation.conversationId)
-    setJoinedRtcRoomUsers([{ userId: rootStore.client.user }]);
+    setJoinedRtcRoomUsers([{ userId: rootStore.client.user }])
     return new Promise((resolve, reject) => {
-      _resolve.current = resolve;
-    });
-  };
+      _resolve.current = resolve
+    })
+  }
 
   const handleRing = (data: any) => {
     if (data.type === 2 || data.type === 3) {
       let groupAvatarUrl = rootStore.addressStore.groups.find(
         (item: any) => item.groupid === data.groupId
-      )?.avatarUrl;
-      setGroupAvatar(groupAvatarUrl || "");
+      )?.avatarUrl
+      setGroupAvatar(groupAvatarUrl || '')
     }
-  };
+  }
 
-  let _resolve = useRef<any>(null);
-  const thread = rootStore.threadStore;
+  let _resolve = useRef<any>(null)
+  const thread = rootStore.threadStore
 
-  const chatRef = useRef<any>(null);
+  const chatRef = useRef<any>(null)
 
   useImperativeHandle(ref, () => ({
     startVideoCall: chatRef.current.startVideoCall,
-    startAudioCall: chatRef.current.startAudioCall,
-  }));
+    startAudioCall: chatRef.current.startAudioCall
+  }))
 
   useEffect(() => {
     // 获取群组头像
@@ -162,53 +193,53 @@ const ChatContainer = forwardRef((props, ref) => {
           .filter((item) => !item.avatarUrl)
           .map((item) => {
             //@ts-ignore
-            return item.groupid;
-          }) || [];
+            return item.groupid
+          }) || []
       getGroupAvatar(groupIds).then((res) => {
         for (let groupId in res) {
-          rootStore.addressStore.updateGroupAvatar(groupId, res[groupId]);
+          rootStore.addressStore.updateGroupAvatar(groupId, res[groupId])
         }
-      });
+      })
     }
-  }, [rootStore.loginState, rootStore.addressStore.groups.length]);
+  }, [rootStore.loginState, rootStore.addressStore.groups.length])
 
   // --- 创建会话 ---
-  const [createChatVisible, setCreateChatVisible] = useState(false);
-  let [groupAvatar, setGroupAvatar] = useState("");
+  const [createChatVisible, setCreateChatVisible] = useState(false)
+  let [groupAvatar, setGroupAvatar] = useState('')
   useEffect(() => {
-    setConversationDetailVisible(false);
-    setCvsItem(rootStore.conversationStore.currentCvs);
-
-    if (rootStore.conversationStore.currentCvs.chatType === "groupChat") {
+    setConversationDetailVisible(false)
+    setShowSummaryOptions(false)
+    dispatch(closePanel())
+    setCvsItem(rootStore.conversationStore.currentCvs)
+    if (rootStore.conversationStore.currentCvs.chatType === 'groupChat') {
       let groupAvatarUrl = rootStore.addressStore.groups.find(
         (item: any) =>
           item.groupid === rootStore.conversationStore.currentCvs.conversationId
-      )?.avatarUrl;
-      setGroupAvatar(groupAvatarUrl || "");
+      )?.avatarUrl
+      setGroupAvatar(groupAvatarUrl || '')
     }
-  }, [rootStore.conversationStore.currentCvs]);
-
+  }, [rootStore.conversationStore.currentCvs])
 
   // ---- pin message ----
-  const { visible: pinMsgVisible, hide: hidePinMsg } = usePinnedMessage();
+  const { visible: pinMsgVisible, hide: hidePinMsg } = usePinnedMessage()
 
   useEffect(() => {
     if (pinMsgVisible) {
-      thread.setThreadVisible(false);
-      setConversationDetailVisible(false);
+      thread.setThreadVisible(false)
+      setConversationDetailVisible(false)
     }
-  }, [pinMsgVisible]);
+  }, [pinMsgVisible])
 
   useEffect(() => {
     if (thread.showThreadPanel) {
-      hidePinMsg();
-      setConversationDetailVisible(false);
+      hidePinMsg()
+      setConversationDetailVisible(false)
     }
-  }, [thread.showThreadPanel]);
+  }, [thread.showThreadPanel])
   return (
     <div
-      className={classNames("chat-container", {
-        "chat-container-dark": themeMode === "dark",
+      className={classNames('chat-container', {
+        'chat-container-dark': themeMode === 'dark'
       })}
     >
       <div className="chat-container-conversation">
@@ -222,7 +253,7 @@ const ChatContainer = forwardRef((props, ref) => {
                     type="PLUS_IN_CIRCLE"
                     width={24}
                     height={24}
-                    color={themeMode == "dark" ? "#C8CDD0" : "#464E53"}
+                    color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
                   />
                 ),
                 actions: [
@@ -232,13 +263,13 @@ const ChatContainer = forwardRef((props, ref) => {
                         type="BUBBLE_FILL"
                         width={24}
                         height={24}
-                        color={themeMode == "dark" ? "#C8CDD0" : "#464E53"}
+                        color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
                       />
                     ),
-                    content: i18next.t("newConversation"),
+                    content: i18next.t('newConversation'),
                     onClick: () => {
-                      setCreateChatVisible(true);
-                    },
+                      setCreateChatVisible(true)
+                    }
                   },
                   {
                     icon: (
@@ -246,14 +277,14 @@ const ChatContainer = forwardRef((props, ref) => {
                         type="PERSON_ADD_FILL"
                         width={24}
                         height={24}
-                        color={themeMode == "dark" ? "#C8CDD0" : "#464E53"}
+                        color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
                       />
                     ),
-                    content: i18next.t("addContact"),
+                    content: i18next.t('addContact'),
                     onClick: () => {
-                      setAddContactVisible(true);
+                      setAddContactVisible(true)
                       // setUserSelectVisible(true);
-                    },
+                    }
                   },
                   {
                     icon: (
@@ -261,18 +292,18 @@ const ChatContainer = forwardRef((props, ref) => {
                         type="PERSON_DOUBLE_FILL"
                         width={24}
                         height={24}
-                        color={themeMode == "dark" ? "#C8CDD0" : "#464E53"}
+                        color={themeMode == 'dark' ? '#C8CDD0' : '#464E53'}
                       />
                     ),
-                    content: i18next.t("createGroup"),
+                    content: i18next.t('createGroup'),
                     onClick: () => {
-                      setUserSelectVisible(true);
-                    },
-                  },
+                      setUserSelectVisible(true)
+                    }
+                  }
                 ],
                 tooltipProps: {
-                  placement: "bottomRight",
-                },
+                  placement: 'bottomRight'
+                }
               }}
               content={
                 <div className={`header-content ${themeMode}`}>Chats</div>
@@ -281,8 +312,8 @@ const ChatContainer = forwardRef((props, ref) => {
             ></Header>
           )}
           onItemClick={(item) => {
-            setConversationDetailVisible(false);
-            setCvsItem(item);
+            setConversationDetailVisible(false)
+            setCvsItem(item)
           }}
           className="conversation-list"
         ></ConversationList>
@@ -291,17 +322,17 @@ const ChatContainer = forwardRef((props, ref) => {
       <div className="chat-container-chat">
         <div
           style={{
-            display: "flex",
+            display: 'flex',
             flex: 1,
-            borderLeft: "1px solid transparent",
-            overflow: "hidden",
-            transition: "all 0.5s ease",
+            borderLeft: '1px solid transparent',
+            overflow: 'hidden',
+            transition: 'all 0.5s ease'
           }}
         >
           {createChatVisible && (
             <CreateChat
               onClosed={() => {
-                setCreateChatVisible(false);
+                setCreateChatVisible(false)
               }}
             />
           )}
@@ -315,44 +346,44 @@ const ChatContainer = forwardRef((props, ref) => {
             ref={chatRef}
             onOpenThread={() => {
               if (conversationDetailVisible) {
-                setConversationDetailVisible(false);
+                setConversationDetailVisible(false)
               }
             }}
             messageListProps={{
               renderUserProfile: () => {
-                return null;
+                return null
               },
               messageProps: {
                 // 单条转发
                 onForwardMessage: (msg: any) => {
-                  let forwardMsg = { ...msg };
-                  if (forwardMsg.type === "video") {
+                  let forwardMsg = { ...msg }
+                  if (forwardMsg.type === 'video') {
                     forwardMsg.body = {
-                      url: forwardMsg.url.split("?")[0],
+                      url: forwardMsg.url.split('?')[0],
                       filename: forwardMsg.filename,
                       secret: forwardMsg.secret,
-                      file_length: forwardMsg.file_length,
-                    };
-                    forwardMsg.thumb = "";
-                  } else if (forwardMsg.type === "audio") {
-                    forwardMsg.body = {
-                      url: forwardMsg.url,
-                      filename: forwardMsg.filename,
-                      secret: forwardMsg.secret,
-                      file_length: forwardMsg.file_length,
-                      length: forwardMsg.length,
-                    };
-                  } else if (forwardMsg.type === "file") {
+                      file_length: forwardMsg.file_length
+                    }
+                    forwardMsg.thumb = ''
+                  } else if (forwardMsg.type === 'audio') {
                     forwardMsg.body = {
                       url: forwardMsg.url,
                       filename: forwardMsg.filename,
                       secret: forwardMsg.secret,
                       file_length: forwardMsg.file_length,
-                    };
+                      length: forwardMsg.length
+                    }
+                  } else if (forwardMsg.type === 'file') {
+                    forwardMsg.body = {
+                      url: forwardMsg.url,
+                      filename: forwardMsg.filename,
+                      secret: forwardMsg.secret,
+                      file_length: forwardMsg.file_length
+                    }
                   }
-                  forwardMsg.file && delete forwardMsg.file;
-                  forwardMsg.id = Date.now() + "";
-                  forwardMsg.from = rootStore.client.user;
+                  forwardMsg.file && delete forwardMsg.file
+                  forwardMsg.id = Date.now() + ''
+                  forwardMsg.from = rootStore.client.user
                   forwardMsg.ext = {
                     ease_chat_uikit_user_info: {
                       nickname:
@@ -362,17 +393,17 @@ const ChatContainer = forwardRef((props, ref) => {
                       avatarURL:
                         rootStore.addressStore.appUsersInfo[
                           rootStore.client.user
-                        ].avatarurl,
-                    },
-                  };
-                  forwardMsg.reactions = undefined;
-                  forwardMsg.isChatThread = false;
-                  forwardMsg.chatThreadOverview = undefined;
-                  forwardMsg.chatThread = undefined;
-                  forwardMsg.time = Date.now();
+                        ].avatarurl
+                    }
+                  }
+                  forwardMsg.reactions = undefined
+                  forwardMsg.isChatThread = false
+                  forwardMsg.chatThreadOverview = undefined
+                  forwardMsg.chatThread = undefined
+                  forwardMsg.time = Date.now()
                   // 复用合并转发的逻辑
-                  setForwardedMessages(forwardMsg);
-                  setContactListVisible(true);
+                  setForwardedMessages(forwardMsg)
+                  setContactListVisible(true)
                 },
                 reaction: appConfig.reaction,
                 thread: appConfig.thread,
@@ -381,66 +412,103 @@ const ChatContainer = forwardRef((props, ref) => {
                   icon: null,
                   actions: [
                     {
-                      content: "FORWARD",
-                      onClick: () => {},
+                      content: 'FORWARD',
+                      onClick: () => {}
                     },
                     {
-                      content: "REPLY",
-                      onClick: () => {},
+                      content: 'REPLY',
+                      onClick: () => {}
                     },
                     {
-                      content: "UNSEND",
-                      onClick: () => {},
+                      content: 'UNSEND',
+                      onClick: () => {}
                     },
                     {
-                      content: "Modify",
-                      onClick: () => {},
+                      content: 'Modify',
+                      onClick: () => {}
                     },
                     {
-                      content: "SELECT",
-                      onClick: () => {},
+                      content: 'SELECT',
+                      onClick: () => {}
                     },
                     {
-                      content: "PIN",
-                      onClick: () => {},
+                      content: 'PIN',
+                      onClick: () => {}
                     },
                     {
                       visible: appConfig.translation,
-                      content: "TRANSLATE",
-                      onClick: () => {},
+                      content: 'TRANSLATE',
+                      onClick: () => {}
                     },
                     {
-                      content: "REPORT",
-                      onClick: () => {},
+                      content: 'REPORT',
+                      onClick: () => {}
                     },
                     {
-                      content: "DELETE",
-                      onClick: () => {},
-                    },
-                  ],
-                },
-              },
+                      content: 'DELETE',
+                      onClick: () => {}
+                    }
+                  ]
+                }
+              }
             }}
             messageInputProps={{
               enabledTyping: true,
               onSendMessage: (msg) => {
                 // 发送消息回调，如果是合并转发的消息，显示转发弹窗
                 // @ts-ignore
-                if (msg.type == "combine") {
-                  setForwardedMessages(msg);
-                  setContactListVisible(true);
+                if (msg.type == 'combine') {
+                  setForwardedMessages(msg)
+                  setContactListVisible(true)
                 }
-              },
+              }
             }}
             headerProps={{
-              moreAction: {
-                // 关闭默认行为，自定义更多操作
-                visible: true,
-                actions: [],
+              ...{
+                moreAction: {
+                  // 关闭默认行为，自定义更多操作
+                  visible: true,
+                  actions: []
+                },
+                style: { cursor: 'pointer' },
+                onClickAvatar: handleEllipsisClick,
+                onClickEllipsis: handleEllipsisClick
               },
-              style: { cursor: "pointer" },
-              onClickAvatar: handleEllipsisClick,
-              onClickEllipsis: handleEllipsisClick,
+              ...(cvsItem.chatType == 'groupChat'
+                ? {
+                    suffixIcon: (
+                      <CreateGroupChatSummary
+                        open={showSummaryOptions}
+                        setOpen={setShowSummaryOptions}
+                        onClick={(item) => {
+                          setConversationDetailVisible(false)
+                          setShowSummaryOptions(false)
+                          let hour = 0
+                          if (item === 'SUMMARY_1_HOUR') {
+                            hour = 1
+                          }
+                          if (item === 'SUMMARY_8_HOURS') {
+                            hour = 8
+                          }
+                          if (item === 'SUMMARY_24_HOURS') {
+                            hour = 24
+                          }
+                          if (item == 'SUMMARY_HISTORY') {
+                            hour = 0
+                          }
+                          dispatch(
+                            setGenerateParams({
+                              userId: rootStore.client.user,
+                              groupId: cvsItem.conversationId,
+                              hour
+                            })
+                          )
+                          dispatch(openPanel())
+                        }}
+                      />
+                    )
+                  }
+                : {})
             }}
             rtcConfig={{
               // @ts-ignore
@@ -455,49 +523,49 @@ const ChatContainer = forwardRef((props, ref) => {
               //@ts-ignore
               onAddPerson: (data: any) => {
                 // console.log("onAddPerson", data);
-                setMediaType(data.type === 2 ? "video" : "audio");
-                setRtcGroupId(data.groupId);
-                setUserInviteModalVisible(true);
+                setMediaType(data.type === 2 ? 'video' : 'audio')
+                setRtcGroupId(data.groupId)
+                setUserInviteModalVisible(true)
                 const joinedUsers = data.joinedMembers.map(
                   (item: { agoraUid: number; imUserId: string }) => {
-                    return { userId: item.imUserId };
+                    return { userId: item.imUserId }
                   }
-                );
-                setJoinedRtcRoomUsers(joinedUsers);
+                )
+                setJoinedRtcRoomUsers(joinedUsers)
                 return new Promise((resolve) => {
-                  _resolve.current = resolve;
-                });
+                  _resolve.current = resolve
+                })
               },
-              groupAvatar: groupAvatar,
+              groupAvatar: groupAvatar
             }}
           ></Chat>
 
           {/** 是否显示群组设置 */}
           {conversationDetailVisible && (
             <div className="chat-container-chat-right">
-              {cvsItem.chatType == "groupChat" ? (
+              {cvsItem.chatType == 'groupChat' ? (
                 <GroupDetail
                   conversation={{
-                    chatType: "groupChat",
-                    conversationId: cvsItem.conversationId,
+                    chatType: 'groupChat',
+                    conversationId: cvsItem.conversationId
                   }}
                   onLeaveGroup={() => {
-                    setConversationDetailVisible(false);
+                    setConversationDetailVisible(false)
                   }}
                   onDestroyGroup={() => {
-                    setConversationDetailVisible(false);
+                    setConversationDetailVisible(false)
                   }}
                   // @ts-ignore
                   groupMemberProps={{
                     onPrivateChat: () => {
-                      setConversationDetailVisible(false);
-                    },
+                      setConversationDetailVisible(false)
+                    }
                     // onAddContact: () => {
                     //   toast.success("Friend request sent");
                     // },
                   }}
                   onUserIdCopied={() => {
-                    toast.success(i18next.t("copied"));
+                    toast.success(i18next.t('copied'))
                   }}
                 ></GroupDetail>
               ) : (
@@ -509,6 +577,7 @@ const ChatContainer = forwardRef((props, ref) => {
         {/** 是否显示子区 */}
         {thread.showThreadPanel &&
           !pinMsgVisible &&
+          !groupChatSummaryVisible &&
           !conversationDetailVisible && (
             <div className="chat-container-chat-right">
               <Thread
@@ -517,36 +586,36 @@ const ChatContainer = forwardRef((props, ref) => {
                   messageProps: {
                     // @ts-ignore
                     onForwardMessage: (msg: { [key: string]: any }) => {
-                      let forwardMsg = { ...msg };
-                      if (forwardMsg.type === "video") {
+                      let forwardMsg = { ...msg }
+                      if (forwardMsg.type === 'video') {
                         forwardMsg.body = {
-                          url: forwardMsg.url.split("?")[0],
+                          url: forwardMsg.url.split('?')[0],
                           filename: forwardMsg.filename,
                           secret: forwardMsg.secret,
-                          file_length: forwardMsg.file_length,
-                        };
-                        forwardMsg.thumb = "";
-                      } else if (forwardMsg.type === "audio") {
-                        forwardMsg.body = {
-                          url: forwardMsg.url,
-                          filename: forwardMsg.filename,
-                          secret: forwardMsg.secret,
-                          file_length: forwardMsg.file_length,
-                          length: forwardMsg.length,
-                        };
-                      } else if (forwardMsg.type === "file") {
+                          file_length: forwardMsg.file_length
+                        }
+                        forwardMsg.thumb = ''
+                      } else if (forwardMsg.type === 'audio') {
                         forwardMsg.body = {
                           url: forwardMsg.url,
                           filename: forwardMsg.filename,
                           secret: forwardMsg.secret,
                           file_length: forwardMsg.file_length,
-                        };
+                          length: forwardMsg.length
+                        }
+                      } else if (forwardMsg.type === 'file') {
+                        forwardMsg.body = {
+                          url: forwardMsg.url,
+                          filename: forwardMsg.filename,
+                          secret: forwardMsg.secret,
+                          file_length: forwardMsg.file_length
+                        }
                       }
-                      forwardMsg.file && delete forwardMsg.file;
+                      forwardMsg.file && delete forwardMsg.file
                       // @ts-ignore
-                      forwardMsg.id = Date.now() + "";
+                      forwardMsg.id = Date.now() + ''
                       // @ts-ignore
-                      forwardMsg.from = rootStore.client.user;
+                      forwardMsg.from = rootStore.client.user
                       // @ts-ignore
                       forwardMsg.ext = {
                         ease_chat_uikit_user_info: {
@@ -557,58 +626,58 @@ const ChatContainer = forwardRef((props, ref) => {
                           avatarURL:
                             rootStore.addressStore.appUsersInfo[
                               rootStore.client.user
-                            ].avatarurl,
-                        },
-                      };
+                            ].avatarurl
+                        }
+                      }
                       // @ts-ignore
-                      forwardMsg.reactions = undefined;
+                      forwardMsg.reactions = undefined
                       // @ts-ignore
-                      forwardMsg.isChatThread = false;
-                      forwardMsg.chatThreadOverview = undefined;
-                      forwardMsg.chatThread = undefined;
-                      setForwardedMessages(forwardMsg);
-                      setContactListVisible(true);
+                      forwardMsg.isChatThread = false
+                      forwardMsg.chatThreadOverview = undefined
+                      forwardMsg.chatThread = undefined
+                      setForwardedMessages(forwardMsg)
+                      setContactListVisible(true)
                     },
                     customAction: {
                       visible: true,
                       icon: null,
                       actions: [
                         {
-                          content: "REPLY",
-                          onClick: () => {},
+                          content: 'REPLY',
+                          onClick: () => {}
                         },
 
                         {
-                          content: "TRANSLATE",
-                          onClick: () => {},
+                          content: 'TRANSLATE',
+                          onClick: () => {}
                         },
                         {
-                          content: "Modify",
-                          onClick: () => {},
+                          content: 'Modify',
+                          onClick: () => {}
                         },
                         {
-                          content: "SELECT",
-                          onClick: () => {},
+                          content: 'SELECT',
+                          onClick: () => {}
                         },
                         {
-                          content: "FORWARD",
-                          onClick: () => {},
+                          content: 'FORWARD',
+                          onClick: () => {}
                         },
                         {
-                          content: "PIN",
-                          onClick: () => {},
-                        },
-                      ],
-                    },
-                  },
+                          content: 'PIN',
+                          onClick: () => {}
+                        }
+                      ]
+                    }
+                  }
                 }}
                 messageInputProps={{
                   onSendMessage: (msg: any) => {
-                    if (msg.type == "combine") {
-                      setForwardedMessages(msg);
-                      setContactListVisible(true);
+                    if (msg.type == 'combine') {
+                      setForwardedMessages(msg)
+                      setContactListVisible(true)
                     }
-                  },
+                  }
                   // enabledTyping: state?.typingSwitch,
                 }}
               ></Thread>
@@ -618,27 +687,33 @@ const ChatContainer = forwardRef((props, ref) => {
         {/** 是否显示 pin message*/}
         {pinMsgVisible &&
           !thread.showThreadPanel &&
+          !groupChatSummaryVisible &&
           !conversationDetailVisible && (
             <div className="chat-container-chat-right">
               <PinnedMessage />
             </div>
           )}
       </div>
+      {groupChatSummaryVisible && (
+        <div className="chat-container-chat-right">
+          <GroupChatSummary />
+        </div>
+      )}
       {/** 创建群组的联系人弹窗 */}
       <UserSelect
         onCancel={() => {
-          setUserSelectVisible(false);
+          setUserSelectVisible(false)
         }}
         onConfirm={() => {
           rootStore.addressStore.createGroup(
             selectedUsers.map((user) => user.userId)
-          );
-          setUserSelectVisible(false);
+          )
+          setUserSelectVisible(false)
         }}
-        okText={i18next.t("create")}
+        okText={i18next.t('create')}
         enableMultipleSelection
         onUserSelect={(user, users) => {
-          setSelectedUsers(users);
+          setSelectedUsers(users)
         }}
         open={userSelectVisible}
       ></UserSelect>
@@ -647,35 +722,35 @@ const ChatContainer = forwardRef((props, ref) => {
         open={contactListVisible}
         closable={false}
         onCancel={() => {
-          setContactListVisible(false);
+          setContactListVisible(false)
         }}
         bodyStyle={{ padding: 0 }}
         footer={null}
       >
-        <div style={{ height: "600px" }}>
+        <div style={{ height: '600px' }}>
           <ContactList
-            style={{ padding: "24px" }}
-            menu={["groups", "contacts"]}
+            style={{ padding: '24px' }}
+            menu={['groups', 'contacts']}
             header={<></>}
             onItemClick={(data) => {
-              forwardedMessages.to = data.id;
+              forwardedMessages.to = data.id
               forwardedMessages.chatType =
-                data.type == "contact" ? "singleChat" : "groupChat";
+                data.type == 'contact' ? 'singleChat' : 'groupChat'
               //@ts-ignore
-              rootStore.messageStore.sendMessage(forwardedMessages);
-              setContactListVisible(false);
+              rootStore.messageStore.sendMessage(forwardedMessages)
+              setContactListVisible(false)
 
               rootStore.messageStore.setSelectedMessage(cvsItem, {
                 selectable: false,
-                selectedMessage: [],
-              });
+                selectedMessage: []
+              })
               rootStore.conversationStore.setCurrentCvs({
-                chatType: data.type == "contact" ? "singleChat" : "groupChat",
+                chatType: data.type == 'contact' ? 'singleChat' : 'groupChat',
                 conversationId: data.id,
                 //@ts-ignore
                 lastMessage: forwardedMessages,
-                name: data.name,
-              });
+                name: data.name
+              })
             }}
           ></ContactList>
         </div>
@@ -684,20 +759,20 @@ const ChatContainer = forwardRef((props, ref) => {
       <Modal
         open={addContactVisible}
         onCancel={() => {
-          setAddContactVisible(false);
+          setAddContactVisible(false)
         }}
         onOk={() => {
-          rootStore.addressStore.addContact(userId);
-          setAddContactVisible(false);
+          rootStore.addressStore.addContact(userId)
+          setAddContactVisible(false)
         }}
-        okText={i18next.t("add")}
+        okText={i18next.t('add')}
         closable={false}
-        title={i18next.t("addContact")}
+        title={i18next.t('addContact')}
       >
         <>
           <div className="add-contact">
             <Input
-              placeholder={i18next.t("enterUserID")}
+              placeholder={i18next.t('enterUserID')}
               className="add-contact-input"
               onChange={handleUserIdChange}
             ></Input>
@@ -707,23 +782,23 @@ const ChatContainer = forwardRef((props, ref) => {
       {/** 音视频邀请用户组件 */}
       <UserInviteModal
         title={
-          mediaType === "audio"
-            ? i18next.t("audioCall")
-            : i18next.t("videoCall")
+          mediaType === 'audio'
+            ? i18next.t('audioCall')
+            : i18next.t('videoCall')
         }
         visible={userInviteModalVisible}
         groupId={rtcGroupId}
         onClose={() => {
-          setUserInviteModalVisible(false);
+          setUserInviteModalVisible(false)
         }}
         onInvite={(users) => {
-          _resolve.current(users);
-          setUserInviteModalVisible(false);
+          _resolve.current(users)
+          setUserInviteModalVisible(false)
         }}
         checkedUsers={joinedRtcRoomUsers}
       ></UserInviteModal>
     </div>
-  );
-});
+  )
+})
 
-export default observer(ChatContainer);
+export default observer(ChatContainer)

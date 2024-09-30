@@ -1,20 +1,20 @@
-import axios from "axios";
-const isSandBox = false;
+import axios from 'axios'
+const isSandBox = true
 const domain =
-  (window.location.protocol === "https:" ? "https:" : "http:") +
-  (isSandBox ? "//a1-hsb.easemob.com" : "//a1-appserver.easemob.com");
+  (window.location.protocol === 'https:' ? 'https:' : 'http:') +
+  (isSandBox ? '//a1-hsb.easemob.com' : '//a1-appserver.easemob.com')
 
 export const sendSms = (phoneNumber: string) => {
   return axios.post(domain + `/inside/app/sms/send/${phoneNumber}`, {
-    phoneNumber,
-  });
-};
+    phoneNumber
+  })
+}
 
 export const getChatToken = (phoneNumber: string, VCode: string) => {
-  return axios.post(domain + "/inside/app/user/login/V2", {
+  return axios.post(domain + '/inside/app/user/login/V2', {
     phoneNumber: phoneNumber,
-    smsCode: VCode,
-  });
+    smsCode: VCode
+  })
   // .then(function (response) {
   //     console.log(response);
   //     const { token, chatUserName } = response.data
@@ -26,4 +26,4 @@ export const getChatToken = (phoneNumber: string, VCode: string) => {
 
   //     dispatch(Creators.loginByToken(chatUserName, token))
   // })
-};
+}

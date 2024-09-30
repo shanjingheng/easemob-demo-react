@@ -144,6 +144,10 @@
         "blockContact": "Block Contact",
         "Confirm blocking user": "Confirm blocking user",
         "Translate message to specified language": "Translate messages to your preferred language.",
-        "Please set browser support notification": "Please set browser support notification"
+        "Please set browser support notification": "Please set browser support notification",
+        "SUMMARY_1_HOUR": "SUMMARY_1_HOUR",
+        "SUMMARY_8_HOURS": "SUMMARY_8_HOUR",
+        "SUMMARY_24_HOURS": "SUMMARY_24_HOUR",
+        "SUMMARY_HISTORY": "SUMMARY_HISTORY"
     }
 }

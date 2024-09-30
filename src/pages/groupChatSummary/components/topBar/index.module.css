@@ -1,0 +1,41 @@
+.topBar {
+  background: var(--neutral-98, #f9fafa);
+  width: 100%;
+  padding: 12px 0;
+  overflow: hidden;
+  height: 60ox;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  max-width: 332px;
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  color: var(--neutral-1, #171a1c);
+  font: 500 18px/1 Noto Sans SC, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.buttonContainer {
+  display: flex;
+  align-items: center;
+  padding: 6px;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.divider {
+  background-color: #e3e6e8;
+  height: 1px;
+  width: 100%;
+  border: none;
+  margin-top: 11px;
+}

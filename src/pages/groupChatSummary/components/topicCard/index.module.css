@@ -1,0 +1,229 @@
+.topicCard {
+  border-radius: 8px;
+  background: var(--Neutral-95, #f1f2f3);
+  display: flex;
+  margin-top: 8px;
+  flex-direction: column;
+  overflow: hidden;
+  align-items: start;
+  padding: 2px 8px;
+}
+
+.header {
+  align-self: stretch;
+  display: flex;
+  width: 100%;
+  height: 20px;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.timeRange {
+  align-self: stretch;
+  gap: 2px;
+  color: var(--Neutral-3, #464e53);
+  margin: auto 0;
+  font-size: 12px;
+  font: 500 12px/1 Roboto, sans-serif;
+}
+
+.loading {
+  margin-top: 9px;
+  margin-bottom: 9px;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 2px;
+}
+
+.actionButton {
+  border: none;
+  padding: 0 3px;
+  width: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+}
+
+.actionIcon {
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+  width: 16px;
+  align-self: stretch;
+  margin: auto 0;
+}
+
+.actionIcon:hover {
+  cursor: pointer;
+  rect {
+    fill: #009DFF
+  }
+  path {
+    fill: #009DFF
+  }
+}
+
+.topicContainer {
+   border-top: 1px solid var(--Neutral-9, #e3e6e8);
+   width: 100%;
+}
+
+/* .topicContainer:last-child {
+  border-bottom: none;
+} */
+
+.topicTitle {
+  align-self: stretch;
+  margin-top: 12px;
+  gap: 5px;
+  color: var(--Neutral-1, #171a1c);
+  font: 500 14px/1 PingFang SC, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.messageInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--Neutral-3, #464e53);
+  text-align: center;
+  justify-content: start;
+  font: 400 12px/1 PingFang SC, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.messageCount {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: start;
+  margin: auto 0;
+}
+
+.participantInfo {
+  display: flex;
+  margin-top: 6px;
+  align-items: center;
+  gap: 6px;
+  color: var(--Neutral-3, #464e53);
+  text-align: center;
+  justify-content: start;
+  font: 500 12px/1 PingFang SC, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.participantAvatar {
+  /* aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center; */
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  align-self: stretch;
+  margin: auto 0;
+}
+
+.topicContent {
+  align-self: stretch;
+  margin-top: 10px;
+  gap: 5px;
+  color: var(--Neutral-1, #171a1c);
+  font: 400 12px/16px PingFang SC, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.divider {
+  aspect-ratio: 333.33;
+  object-fit: contain;
+  object-position: center;
+  width: 100%;
+  stroke-width: 1px;
+  stroke: var(--Neutral-9, #e3e6e8);
+  margin-top: 16px;
+}
+
+.mediaSection {
+  align-self: stretch;
+  margin-top: 11px;
+  margin-bottom: 0;
+  gap: 5px;
+  color: var(--Neutral-1, #171a1c);
+  font: 500 14px/1 PingFang SC, -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.mediaPreview {
+  display: flex;
+  margin-top: 8px;
+  align-items: center;
+  gap: 2px;
+  justify-content: start;
+  margin-bottom: 8px;
+}
+
+.mediaItem {
+  width: 39px;
+  height: 39px;
+  border-radius: 2px;
+  align-self: stretch;
+  margin: auto 0;
+  cursor:pointer;
+}
+
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.contactListItem {
+  border-radius: 4px;
+  background: var(--Neutral-9, #e3e6e8);
+  display: flex;
+  gap: 8px;
+  overflow: hidden;
+  font-family: Roboto, sans-serif;
+  padding: 6px 65px 6px 8px;
+  align-items: center;
+  margin-top:8px;
+}
+
+.contactListItem:hover {
+  cursor: pointer;
+}
+
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.documentTitle {
+  align-self: stretch;
+  width: 100%;
+  font-size: 14px;
+  color: var(--neutral-1, #171a1c);
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.fileSize {
+  color: var(--neutral-5, #75828a);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.deleteTime {
+  font-size: 12px;
+  padding: 0 5px;
+  background-color: #ccc;
+}
