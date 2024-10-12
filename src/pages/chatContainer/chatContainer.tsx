@@ -38,7 +38,6 @@ import toast from '../../components/toast/toast'
 import { APP_ID, appKey } from '../../config'
 import { getRtcToken, getRtcChannelMembers } from '../../service/rtc'
 import { getGroupAvatar } from '../../service/avatar'
-import summary from '../../assets/summary.svg'
 import UserInviteModal from '../../components/userInviteModal/userInviteModal'
 import './chatContainer.scss'
 import UserInfo from '../../components/userInfo/userInfo'
@@ -47,8 +46,6 @@ import { useAppSelector, useAppDispatch } from '../../hooks'
 import CreateChat from './createChat'
 import classNames from 'classnames'
 import i18next from '../../i18n'
-import { url } from 'inspector'
-import { set } from 'mobx'
 import CreateGroupChatSummary from './createGroupChatSummary'
 import GroupChatSummary from '../groupChatSummary/groupChatSummary'
 import {
@@ -319,7 +316,12 @@ const ChatContainer = forwardRef((props, ref) => {
         ></ConversationList>
       </div>
 
-      <div className="chat-container-chat">
+      <div
+        className="chat-container-chat"
+        onClick={() => {
+          showSummaryOptions && setShowSummaryOptions(false)
+        }}
+      >
         <div
           style={{
             display: 'flex',

@@ -8,6 +8,7 @@ import {
   deleteSummaryApi
 } from '../service/summary'
 import toast from '../components/toast/toast'
+import i18n from '../i18n'
 
 interface useGroupChatSummaryProps {
   groupId: string
@@ -39,13 +40,13 @@ export const useGroupChatSummary = ({
     generateSummaryApi(groupId, userId, startTime.current, endTime.current)
       .then(({ data }) => {
         if (data.data.topicInfos.length === 0) {
-          toast.info('该会话无法生产有效摘要')
+          toast.info(i18n.t('CAN_NOT_GENERATE_SUMMARY'))
         }
         dispatch(setSummaryList([data.data]))
         setSummary(data.data as any)
       })
       .catch((err) => {
-        toast.error('生成会话摘要失败')
+        toast.error(i18n.t('GENERATE_SUMMARY_FAILED'))
         dispatch(setSummaryList([{ ...initSummary, isGenerating: false }]))
       })
       .finally(() => {
@@ -59,7 +60,7 @@ export const useGroupChatSummary = ({
     getSummaryHistoryApi(groupId, userId)
       .then(({ data }) => {
         if (data.data.length === 0) {
-          toast.info('暂无历史摘要')
+          toast.info(i18n.t('NO_SUMMARY_HISTORY'))
           return
         }
         const sortData = data.data.sort(
@@ -68,7 +69,7 @@ export const useGroupChatSummary = ({
         dispatch(setSummaryList(sortData))
       })
       .catch((err) => {
-        toast.error('获取会话摘要历史失败')
+        toast.error(i18n.t('GET_SUMMARY_HISTORY_FAILED'))
       })
       .finally(() => {
         setLoading(false)
@@ -79,11 +80,11 @@ export const useGroupChatSummary = ({
     setLoading(true)
     deleteSummaryApi(summaryId, groupId, userId)
       .then(() => {
-        toast.success('删除会话摘要成功')
+        toast.success(i18n.t('DELETE_SUMMARY_SUCCESS'))
         getSummaryHistory()
       })
       .catch(() => {
-        toast.error('删除会话摘要失败')
+        toast.error(i18n.t('DELETE_SUMMARY_FAILED'))
       })
       .finally(() => {
         setLoading(false)

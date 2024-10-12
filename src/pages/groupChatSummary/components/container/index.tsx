@@ -5,6 +5,7 @@ import { useAppSelector } from '../../../../hooks'
 import { useGroupChatSummary } from '../../../../hooks/useGroupChatSummary'
 import { Summary } from '../../../../models'
 import Loading from '../../../../components/loading'
+import i18n from '../../../../i18n'
 
 function formatTimestamp(timestamp: string): string {
   if (!timestamp) return 'YYYY-MM-DD'
@@ -47,9 +48,9 @@ const Container: React.FC = () => {
       summaryId,
       topics: topicInfos,
       loading: summary.isGenerating,
-      timeRange: `${formatTimestamp(startTimestamp)} 至 ${formatTimestamp(
-        endTimestamp
-      )}`
+      timeRange: `${formatTimestamp(startTimestamp)} ${i18n.t(
+        'TIME_RANGE_DELIMITER'
+      )} ${formatTimestamp(endTimestamp)}`
     }
   }
 

@@ -1,192 +1,190 @@
-import "./login.scss";
+import './login.scss'
 import React, {
   ChangeEvent,
   ChangeEventHandler,
   useEffect,
-  useState,
-} from "react";
-import i18next from "../../i18n";
-import loading from "../../assets/loading.png";
-import closeIcon from "../../assets/Xmark@2x.png";
-import { Icon, Checkbox } from "easemob-chat-uikit";
-import toast from "../../components/toast/toast";
-import { useNavigate } from "react-router-dom";
-import { sendSms, getChatToken } from "../../service/login";
-import { loginWithToken, setSDKConfig } from "../../store/loginSlice";
-import { useAppSelector, useAppDispatch } from "../../hooks";
-import { useDispatch } from "react-redux";
-import { updateAppConfig } from "../../store/appConfigSlice";
-import { DEMO_VERSION, SDK_VERSION, UIKIT_VERSION, appKey } from "../../config";
+  useState
+} from 'react'
+import i18next from '../../i18n'
+import loading from '../../assets/loading.png'
+import closeIcon from '../../assets/Xmark@2x.png'
+import { Icon, Checkbox } from 'easemob-chat-uikit'
+import toast from '../../components/toast/toast'
+import { useNavigate } from 'react-router-dom'
+import { sendSms, getChatToken } from '../../service/login'
+import { loginWithToken, setSDKConfig } from '../../store/loginSlice'
+import { useAppSelector, useAppDispatch } from '../../hooks'
+import { useDispatch } from 'react-redux'
+import { updateAppConfig } from '../../store/appConfigSlice'
+import { DEMO_VERSION, SDK_VERSION, UIKIT_VERSION, appKey } from '../../config'
 
 const Login = () => {
-  const dispatch = useAppDispatch();
-  const state = useAppSelector((state) => state.login);
-  const appConfigState = useAppSelector((state) => state.appConfig);
+  const dispatch = useAppDispatch()
+  const state = useAppSelector((state) => state.login)
+  const appConfigState = useAppSelector((state) => state.appConfig)
 
   useEffect(() => {
     dispatch(
       setSDKConfig({
         appKey: appKey,
-        useDNS: true,
+        useDNS: true
       })
-    );
-  }, []);
+    )
+  }, [])
   useEffect(() => {
     if (state.loggedIn) {
-      navigate("/main");
+      navigate('/main')
     }
-  }, [state.loggedIn]);
+  }, [state.loggedIn])
   const [values, setValues] = useState({
-    phoneNumber: "",
-    vCode: "",
-  });
-  const [isLogging, setIsLogging] = useState(false);
-  const [countdown, setCountdown] = useState(60);
-  const [isCounting, setIsCounting] = useState(false);
-  const [agree, setAgree] = useState(false);
+    phoneNumber: '',
+    vCode: ''
+  })
+  const [isLogging, setIsLogging] = useState(false)
+  const [countdown, setCountdown] = useState(60)
+  const [isCounting, setIsCounting] = useState(false)
+  const [agree, setAgree] = useState(false)
   const handleChange =
-    (type: "phoneNumber" | "vCode") =>
+    (type: 'phoneNumber' | 'vCode') =>
     (event: ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      if (type === "phoneNumber") {
-        if (/^[0-9\b]+$/.test(value) || value === "") {
+      const value = event.target.value
+      if (type === 'phoneNumber') {
+        if (/^[0-9\b]+$/.test(value) || value === '') {
           setValues({
             ...values,
-            phoneNumber: value,
-          });
+            phoneNumber: value
+          })
         }
-      } else if (type === "vCode") {
+      } else if (type === 'vCode') {
         setValues({
           ...values,
-          vCode: event.target.value,
-        });
+          vCode: event.target.value
+        })
       }
-    };
+    }
 
   const clearPhoneNumber = () => {
     setValues({
       ...values,
-      phoneNumber: "",
-    });
-  };
+      phoneNumber: ''
+    })
+  }
   const getVCode = () => {
     if (isCounting) {
-      return;
+      return
     }
     if (values.phoneNumber.length !== 11) {
-      toast.error(i18next.t("Please enter the correct phone number"));
-      return;
+      toast.error(i18next.t('Please enter the correct phone number'))
+      return
     }
     sendSms(values.phoneNumber)
       .then((res) => {
-        setIsCounting(true);
+        setIsCounting(true)
         const timer = setInterval(() => {
           setCountdown((countdown) => {
             if (countdown === 0) {
-              clearInterval(timer);
-              setIsCounting(false);
-              return 60;
+              clearInterval(timer)
+              setIsCounting(false)
+              return 60
             } else {
-              return countdown - 1;
+              return countdown - 1
             }
-          });
-        }, 1000);
+          })
+        }, 1000)
       })
       .catch(function (error) {
-        console.log("error", error.response);
-        if (error.response.status == "400") {
-          if (error.response.data?.errorInfo == "phone number illegal") {
-            i18next.t("Please enter the correct phone number");
+        console.log('error', error.response)
+        if (error.response.status == '400') {
+          if (error.response.data?.errorInfo == 'phone number illegal') {
+            i18next.t('Please enter the correct phone number')
           } else if (
             error.response.data?.errorInfo ==
-            "Please wait a moment while trying to send."
+            'Please wait a moment while trying to send.'
           ) {
             toast.error(
               `${i18next.t(
-                "Your operation is too frequent, please try again later"
+                'Your operation is too frequent, please try again later'
               )}!`
-            );
+            )
           } else if (
-            error.response.data?.errorInfo.includes("exceed the limit")
+            error.response.data?.errorInfo.includes('exceed the limit')
           ) {
-            toast.error(i18next.t("Obtaining has reached the maximum limit"));
+            toast.error(i18next.t('Obtaining has reached the maximum limit'))
           } else {
-            toast.error(error.response.data?.errorInfo);
+            toast.error(error.response.data?.errorInfo)
           }
         } else {
-          toast.error(i18next.t("Failed to obtain verification code"));
+          toast.error(i18next.t('Failed to obtain verification code'))
         }
-      });
-  };
+      })
+  }
 
   const handleAgreeChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setAgree(event.target.checked);
-  };
+    setAgree(event.target.checked)
+  }
   const login = () => {
     if (!agree) {
-      toast.info(i18next.t("Please agree to privacy and policies"));
-      return;
+      toast.info(i18next.t('Please agree to privacy and policies'))
+      return
     } else if (values.phoneNumber.length !== 11) {
-      toast.info(i18next.t("Please enter the correct phone number"));
-      return;
+      toast.info(i18next.t('Please enter the correct phone number'))
+      return
     } else if (values.vCode.length !== 6) {
-      toast.info(i18next.t("Please enter the correct verification code"));
-      return;
+      toast.info(i18next.t('Please enter the correct verification code'))
+      return
     }
 
-    setIsLogging(true);
+    setIsLogging(true)
 
     getChatToken(values.phoneNumber, values.vCode)
       .then((res) => {
-        console.log("res", res);
-        const { token, chatUserName } = res.data;
+        console.log('res', res)
+        const { token, chatUserName } = res.data
 
-        dispatch(loginWithToken({ userId: chatUserName, chatToken: token }));
+        dispatch(loginWithToken({ userId: chatUserName, chatToken: token }))
       })
       .catch(function (error) {
         switch (error.response?.data?.errorInfo) {
-          case "UserId password error.":
-            toast.error(i18next.t("Incorrect username or password"));
-            break;
+          case 'UserId password error.':
+            toast.error(i18next.t('Incorrect username or password'))
+            break
           case `UserId ${values.phoneNumber} does not exist.`:
-            toast.error(i18next.t("user does not exist"));
-            break;
-          case "phone number illegal":
-            toast.error(i18next.t("Please enter the correct phone number"));
-            break;
-          case "SMS verification code error.":
-            toast.error(i18next.t("Verification code error"));
-            break;
-          case "Sms code cannot be empty":
-            toast.error(i18next.t("The verification code cannot be empty"));
-            break;
-          case "Please send SMS to get mobile phone verification code.":
-            toast.error(
-              i18next.t("Please use SMS verification code to log in")
-            );
-            break;
+            toast.error(i18next.t('user does not exist'))
+            break
+          case 'phone number illegal':
+            toast.error(i18next.t('Please enter the correct phone number'))
+            break
+          case 'SMS verification code error.':
+            toast.error(i18next.t('Verification code error'))
+            break
+          case 'Sms code cannot be empty':
+            toast.error(i18next.t('The verification code cannot be empty'))
+            break
+          case 'Please send SMS to get mobile phone verification code.':
+            toast.error(i18next.t('Please use SMS verification code to log in'))
+            break
           default:
-            toast.error(i18next.t("Login failed, please try again"));
-            break;
+            toast.error(i18next.t('Login failed, please try again'))
+            break
         }
-        setIsLogging(false);
-      });
-  };
-  const navigate = useNavigate();
+        setIsLogging(false)
+      })
+  }
+  const navigate = useNavigate()
   const goDev = () => {
-    navigate("/dev", { replace: true });
-  };
+    navigate('/dev', { replace: true })
+  }
 
   const changeLang = () => {
-    console.log("i18next.language", i18next.language);
-    const lang = i18next.language === "zh" ? "en" : "zh";
-    dispatch(updateAppConfig({ language: lang }));
-    i18next.changeLanguage(lang);
-  };
+    console.log('i18next.language', i18next.language)
+    const lang = i18next.language === 'zh' ? 'en' : 'zh'
+    dispatch(updateAppConfig({ language: lang }))
+    i18next.changeLanguage(lang)
+  }
   return (
     <div className="login-container">
       <div className="login-form">
-        <div title={i18next.t("switchLanguage")}>
+        <div title={i18next.t('switchLanguage')}>
           <Icon
             type="GLOBE"
             width={24}
@@ -197,13 +195,13 @@ const Login = () => {
         </div>
 
         <div className="login-form-icon"></div>
-        <div className="login-form-AC">{i18next.t("easemob")} IM</div>
+        <div className="login-form-AC">{i18next.t('easemob')} IM</div>
         <div className="input-box">
           <input
             disabled={isLogging}
             className="login-form-input"
-            placeholder={i18next.t("yourPhoneNumber")}
-            onChange={handleChange("phoneNumber")}
+            placeholder={i18next.t('yourPhoneNumber')}
+            onChange={handleChange('phoneNumber')}
             value={values.phoneNumber}
             maxLength={11}
           ></input>
@@ -219,23 +217,23 @@ const Login = () => {
         <div className="input-box">
           <input
             disabled={isLogging}
-            type={"text"}
+            type={'text'}
             maxLength={6}
             className="login-form-input"
-            placeholder={i18next.t("verificationCode")}
+            placeholder={i18next.t('verificationCode')}
             value={values.vCode}
-            onChange={handleChange("vCode")}
+            onChange={handleChange('vCode')}
           ></input>
           <div className="login-form-getCode" onClick={getVCode}>
             {isCounting ? (
-              <span style={{ color: "#ACB4B9" }}>
-                {appConfigState.language == "zh"
+              <span style={{ color: '#ACB4B9' }}>
+                {appConfigState.language == 'zh'
                   ? `${countdown}秒后重新获取`
                   : `Retrieve after ${countdown}s`}
               </span>
             ) : (
-              <span style={{ color: isLogging ? "#ACB4B9" : "#009EFF" }}>
-                {i18next.t("getCode")}
+              <span style={{ color: isLogging ? '#ACB4B9' : '#009EFF' }}>
+                {i18next.t('getCode')}
               </span>
             )}
           </div>
@@ -245,7 +243,7 @@ const Login = () => {
             disabled={false}
             type="button"
             className="login-form-input login-button"
-            value={isLogging ? "" : i18next.t("login")}
+            value={isLogging ? '' : i18next.t('login')}
             onClick={login}
           ></input>
           {isLogging && (
@@ -268,34 +266,34 @@ const Login = () => {
             shape="square"
           />
           <div>
-            {i18next.t("agree")}{" "}
+            {i18next.t('agree')}{' '}
             <span
-              style={{ color: isLogging ? "#ACB4B9" : "#009EFF" }}
+              style={{ color: isLogging ? '#ACB4B9' : '#009EFF' }}
               className="login-form-protocol"
             >
               《
               <a target="blank" href="https://www.easemob.com/terms">
-                {i18next.t("privacy")}
+                {i18next.t('privacy')}
               </a>
-              {i18next.t("and")}
+              {i18next.t('and')}
               <a target="blank" href="https://www.easemob.com/protocol">
-                {i18next.t("policy")}
+                {i18next.t('policy')}
               </a>
               》
-            </span>{" "}
+            </span>{' '}
           </div>
         </div>
       </div>
       <div className="login-copyright">
-        {appConfigState.language == "zh"
+        {appConfigState.language == 'zh'
           ? `© 2024 环信，SDK版本：${SDK_VERSION} UIkit版本：${UIKIT_VERSION} Demo版本：${DEMO_VERSION}`
           : `2024 Easemob Inc, SDK Version: ${SDK_VERSION}  UIkit Version: ${UIKIT_VERSION}  Demo Version: ${DEMO_VERSION}`}
-        <span onDoubleClick={goDev}>{"</>"}</span>
+        <span onDoubleClick={goDev}>{'</>'}</span>
       </div>
     </div>
-  );
-};
+  )
+}
 // console.log(i18n.t(`I have ${count} ${fruit}`));
 // 2024 Easemob Inc, SDK Version: 4.1.1  UIkit Version: Beta0.1.1  Demo Version: 2.0.0
 // Privacy and Policy
-export default Login;
+export default Login

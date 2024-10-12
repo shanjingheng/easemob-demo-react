@@ -11,7 +11,7 @@ export const sendSms = (phoneNumber: string) => {
 }
 
 export const getChatToken = (phoneNumber: string, VCode: string) => {
-  return axios.post(domain + '/inside/app/user/login/V2', {
+  return axios.post(domain + '/inside/app/user/login/V3', {
     phoneNumber: phoneNumber,
     smsCode: VCode
   })

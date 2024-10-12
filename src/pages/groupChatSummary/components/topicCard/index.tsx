@@ -7,6 +7,7 @@ import { Icon, rootStore, Avatar, Modal } from 'easemob-chat-uikit'
 import { Topic } from '../../../../models'
 import Loading from '../../../../components/loading'
 import toast from '../../../../components/toast/toast'
+import i18n from '../../../../i18n'
 
 type TopicProps = Topic & {}
 
@@ -31,7 +32,7 @@ const scrollToMsg = (messageId: string) => {
   if (localMsg) messageId = localMsg.id
   const anchorElement = document.getElementById(messageId)
   if (!anchorElement) {
-    toast.info('本地消息中未找到该消息')
+    toast.info(i18n.t('NOT_FOUND_MESSAGE_AT_LOCAL'))
     return
   }
   anchorElement?.scrollIntoView({ behavior: 'smooth' })
@@ -79,7 +80,9 @@ const MediaContent: React.FC<MediaContentProps> = ({
     <div>
       {imgMsgs.length > 0 && (
         <>
-          <h3 className={styles.mediaSection}>该话题时段包含图片</h3>
+          <h3 className={styles.mediaSection}>
+            {i18n.t('SUMMARY_TOPIC_IMAGES')}
+          </h3>
           <div className={styles.mediaPreview}>
             {imgMsgs.map((msg) => (
               <img
@@ -96,7 +99,9 @@ const MediaContent: React.FC<MediaContentProps> = ({
 
       {attachmentMsgs.length > 0 && (
         <>
-          <h3 className={styles.mediaSection}>该话题时段包含附件</h3>
+          <h3 className={styles.mediaSection}>
+            {i18n.t('SUMMARY_TOPIC_ATTACHMENTS')}
+          </h3>
           <div>
             {attachmentMsgs.map((msg) => {
               return (
@@ -218,19 +223,16 @@ const TopicCard: React.FC<TopicCardProps> = ({
                   content
                 } = topic
                 return (
-                  <div
-                    key={index}
-                    className={styles.topicContainer}
-                    // style={{
-                    //   borderBottom: '1px solid var(--Neutral-9, #e3e6e8)',
-                    //   width: '100%'
-                    // }}
-                  >
+                  <div key={index} className={styles.topicContainer}>
                     <h2 className={styles.topicTitle}>{title}</h2>
                     <div className={styles.messageInfo}>
                       <ChatIcon />
                       <div className={styles.messageCount}>
-                        <span>该话题共{msgCount}条消息</span>
+                        <span>
+                          {i18n.t('SUMMARY_TOPIC_MESSAGE_COUNT', {
+                            count: Number(msgCount)
+                          })}
+                        </span>
                         <Icon
                           type="ARROW_UP_THICK"
                           className={styles.actionIcon}
@@ -257,7 +259,11 @@ const TopicCard: React.FC<TopicCardProps> = ({
                           }
                         </Avatar>
                       ))}
-                      <span>{participants.length}人参与</span>
+                      <span>
+                        {i18n.t('SUMMARY_TOPIC_PARTICIPANTS_COUNT', {
+                          count: participants.length
+                        })}
+                      </span>
                     </div>
                     <p className={styles.topicContent}>{content}</p>
                     <MediaContent
@@ -271,7 +277,7 @@ const TopicCard: React.FC<TopicCardProps> = ({
         </div>
       )}
       <Modal
-        title="删除会话摘要"
+        title={i18n.t('DELETE_SUMMARY')}
         open={showDeleteModal}
         onOk={() => {
           setShowDeleteModal(false)
@@ -282,8 +288,9 @@ const TopicCard: React.FC<TopicCardProps> = ({
         }}
       >
         <p>
-          确认删除<span className={styles.deleteTime}>{timeRange}</span>
-          生成的会话摘要？
+          {i18n.t('DELETE_SUMMARY_TITLE_1')}
+          <span className={styles.deleteTime}>{timeRange}</span>
+          {i18n.t('DELETE_SUMMARY_TITLE_2')}
         </p>
       </Modal>
     </article>

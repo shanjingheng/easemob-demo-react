@@ -6,11 +6,9 @@ import { closePanel } from '../../../../store/summaryInfoSlice'
 
 interface TopBarProps {
   title: string
-  iconSrc: string
-  iconAlt: string
 }
 
-const TopBar: React.FC<TopBarProps> = ({ title, iconSrc, iconAlt }) => {
+const TopBar: React.FC<TopBarProps> = ({ title }) => {
   const dispatch = useAppDispatch()
 
   return (
@@ -29,18 +27,7 @@ const TopBar: React.FC<TopBarProps> = ({ title, iconSrc, iconAlt }) => {
           </Button>
         </div>
       </div>
-      {/* <hr className={styles.divider} /> */}
     </div>
-
-    // <header className={styles.topBar}>
-    //   <div className={styles.container}>
-    //     <h1 className={styles.title}>{title}</h1>
-    //     <Button type="text" shape="circle">
-    //       <Icon type="CLOSE" width={24} height={24} />
-    //     </Button>
-    //   </div>
-    //   <hr className={styles.divider} />
-    // </header>
   )
 }
 

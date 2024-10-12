@@ -147,6 +147,25 @@
         "SUMMARY_1_HOUR": "生成近1小时消息摘要",
         "SUMMARY_8_HOURS": "生成近8小时消息摘要",
         "SUMMARY_24_HOURS": "生成近24小时消息摘要",
-        "SUMMARY_HISTORY": "历史生成摘要查看"
+        "SUMMARY_HISTORY": "历史生成摘要查看",
+        "SUMMARY_MESSAGE_NOT_ENOUGH": "消息数量不足，无法生成会话摘要!",
+        "SUMMARY_AD_TITLE": "AI会话摘要功能上线",
+        "SUMMARY_AD_CONTENT": "试试看吧",
+        "AI_SUMMARY": "AI会话摘要",
+        "GENERATE_SUMMARY_FAILED": "生成会话摘要失败",
+        "CAN_NOT_GENERATE_SUMMARY": "该会话无法生产有效摘要",
+        "GET_SUMMARY_HISTORY_FAILED":"获取会话摘要历史失败",
+        "NO_SUMMARY_HISTORY": "暂无历史摘要",
+        "DELETE_SUMMARY_FAILED": "删除会话摘要失败",
+        "DELETE_SUMMARY_SUCCESS": "删除会话摘要成功",
+        "NOT_FOUND_MESSAGE_AT_LOCAL": "本地消息中未找到该消息",
+        "SUMMARY_TOPIC_IMAGES": "该话题时段包含图片",
+        "SUMMARY_TOPIC_ATTACHMENTS": "该话题时段包含附件",
+        "SUMMARY_TOPIC_MESSAGE_COUNT": "该话题时段共有{{count}}条消息",
+        "SUMMARY_TOPIC_PARTICIPANTS_COUNT": "{{count}}人参与",
+        "DELETE_SUMMARY": "删除会话摘要",
+        "TIME_RANGE_DELIMITER": "至",
+        "DELETE_SUMMARY_TITLE_1": "确认删除",
+        "DELETE_SUMMARY_TITLE_2": "生成的会话摘要？"
     }
 }
