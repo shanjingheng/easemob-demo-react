@@ -16,7 +16,7 @@ export const generateSummaryApi = (
   endTime: string
 ) => {
   return axios.post(
-    `${domain}/${orgName}/${appName}/agent/v1/messages/summary`,
+    `${domain}/${orgName}/${appName}/sdk/agent/v1/messages/summary`,
     {
       conversationId: groupId,
       username: userId,
@@ -34,7 +34,7 @@ export const generateSummaryApi = (
 
 export const getSummaryHistoryApi = (groupId: string, userId: string) => {
   return axios.get(
-    `${domain}/${orgName}/${appName}/agent/v1/messages/summaries`,
+    `${domain}/${orgName}/${appName}/sdk/agent/v1/messages/summaries`,
     {
       headers: {
         Authorization: 'Bearer ' + rootStore.client.context.accessToken
@@ -54,7 +54,7 @@ export const deleteSummaryApi = (
   userId: string
 ) => {
   return axios.delete(
-    `${domain}/${orgName}/${appName}/agent/v1/messages/summary/${summaryId}`,
+    `${domain}/${orgName}/${appName}/sdk/agent/v1/messages/summary/${summaryId}`,
     {
       headers: {
         Authorization: 'Bearer ' + rootStore.client.context.accessToken
